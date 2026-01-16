@@ -157,12 +157,6 @@ defineExpose({
 
 <template>
   <div class="radar-fraud-checker">
-    <!-- 標題區 -->
-    <div class="checker-header">
-      <h2 class="checker-title">Radar Fraud 檢測</h2>
-      <p class="checker-subtitle">使用 Radar SDK 驗證使用者位置與 Fraud 檢測</p>
-    </div>
-
     <!-- PublishableKey 輸入區 -->
     <div v-if="!hideKeyInput" class="input-section">
       <label for="publishableKey" class="input-label">
@@ -413,29 +407,13 @@ defineExpose({
 
 <style scoped>
 .radar-fraud-checker {
-  max-width: 600px;
+  max-width: min(600px, 100vw - 32px);
   margin: 0 auto;
   padding: 24px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #333;
-}
-
-.checker-header {
-  margin-bottom: 24px;
-  text-align: center;
-}
-
-.checker-title {
-  margin: 0 0 8px 0;
-  font-size: 24px;
-  font-weight: 600;
-  color: #1a1a1a;
-}
-
-.checker-subtitle {
-  margin: 0;
-  font-size: 14px;
-  color: #666;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .input-section {
@@ -453,7 +431,7 @@ defineExpose({
 .input-field {
   width: 100%;
   padding: 12px 16px;
-  font-size: 14px;
+  font-size: 16px;
   border: 1px solid #ddd;
   border-radius: 8px;
   outline: none;

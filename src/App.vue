@@ -52,6 +52,7 @@ function handleError(error) {
   display: flex;
   flex-direction: column;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
 }
 
 .app-header {
@@ -80,11 +81,13 @@ function handleError(error) {
 }
 
 .dev-section {
-  max-width: 600px;
+  max-width: calc(100vw - 32px);
+  width: 600px;
   margin: 32px auto 0;
   padding: 24px;
   background-color: #1e1e1e;
   border-radius: 12px;
+  box-sizing: border-box;
 }
 
 .dev-section h2 {
@@ -108,9 +111,11 @@ function handleError(error) {
   font-family: "SF Mono", "Monaco", "Inconsolata", monospace;
   font-size: 12px;
   line-height: 1.5;
-  overflow-x: auto;
+  overflow: auto;
   white-space: pre;
   text-align: left;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 @media (max-width: 480px) {
