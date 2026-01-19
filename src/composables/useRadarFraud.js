@@ -92,62 +92,33 @@ export function useRadarFraud() {
     return FAILURE_REASON_MAP[reason] || reason;
   }
 
-  function collectFailureReasons(result, user) {
+  function collectRawFailureReasons(result, user) {
     const reasons = [];
 
     if (result?.failureReasons && Array.isArray(result.failureReasons)) {
-      result.failureReasons.forEach((reason) => {
-        reasons.push(translateFailureReason(reason));
-      });
+      reasons.push(...result.failureReasons);
     }
 
     if (reasons.length === 0 && user) {
       if (user.failureReasons && Array.isArray(user.failureReasons)) {
-        user.failureReasons.forEach((reason) => {
-          reasons.push(translateFailureReason(reason));
-        });
+        reasons.push(...user.failureReasons);
       }
 
       if (user.fraud) {
         const fraud = user.fraud;
-        if (fraud.mocked && !reasons.some((r) => r.includes("模擬"))) {
-          reasons.push("位置可能被模擬 (mocked)");
-        }
-        if (fraud.jumped && !reasons.some((r) => r.includes("跳躍"))) {
-          reasons.push("位置跳躍異常 (jumped)");
-        }
-        if (fraud.compromised && !reasons.some((r) => r.includes("破解"))) {
-          reasons.push("裝置可能已被破解 (compromised)");
-        }
-        if (fraud.inaccurate && !reasons.some((r) => r.includes("精確度"))) {
-          reasons.push("位置精確度不足 (inaccurate)");
-        }
-        if (fraud.sharing && !reasons.some((r) => r.includes("螢幕分享"))) {
-          reasons.push("偵測到螢幕分享或遠端桌面 (sharing)");
-        }
-        if (
-          fraud.proxy &&
-          !reasons.some((r) => r.includes("代理") || r.includes("VPN"))
-        ) {
-          reasons.push("偵測到 VPN 或代理伺服器 (proxy)");
-        }
+        if (fraud.mocked) reasons.push("fraud_mocked");
+        if (fraud.jumped) reasons.push("fraud_jumped");
+        if (fraud.compromised) reasons.push("fraud_compromised");
+        if (fraud.inaccurate) reasons.push("fraud_inaccurate");
+        if (fraud.sharing) reasons.push("fraud_sharing");
+        if (fraud.proxy) reasons.push("fraud_proxy");
       }
 
-      if (
-        user.country?.passed === false &&
-        !reasons.some((r) => r.includes("國家"))
-      ) {
-        reasons.push(
-          `國家不在允許範圍內: ${user.country.name || user.country.code}`
-        );
+      if (user.country?.passed === false) {
+        reasons.push("country_not_allowed");
       }
-      if (
-        user.state?.passed === false &&
-        !reasons.some((r) => r.includes("州") || r.includes("省"))
-      ) {
-        reasons.push(
-          `州/省不在允許範圍內: ${user.state.name || user.state.code}`
-        );
+      if (user.state?.passed === false) {
+        reasons.push("state_not_allowed");
       }
     }
 
@@ -245,7 +216,10 @@ export function useRadarFraud() {
       }
 
       const passed = resultPassed ?? checkVerificationPassed(user);
-      const failureReasons = collectFailureReasons(result, user);
+      const rawFailureReasons = collectRawFailureReasons(result, user);
+      const translatedFailureReasons = rawFailureReasons.map((reason) =>
+        translateFailureReason(reason)
+      );
 
       if (passed) {
         store.setVerificationPassed(token, user);
@@ -258,13 +232,13 @@ export function useRadarFraud() {
           error: null,
         };
       } else {
-        store.setVerificationDenied(token, user, failureReasons);
+        store.setVerificationDenied(token, user, translatedFailureReasons);
         return {
           success: true,
           passed: false,
           token,
           user,
-          failureReasons,
+          failureReasons: rawFailureReasons,
           error: null,
         };
       }
