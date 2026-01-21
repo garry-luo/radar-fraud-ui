@@ -3,6 +3,7 @@ import { ref } from "vue";
 import RadarFraudChecker from "./components/RadarFraudChecker.vue";
 
 const lastResult = ref(null);
+const copySuccess = ref(false);
 
 function handleVerificationComplete(result) {
   console.log("[App] 檢測完成:", result);
@@ -15,6 +16,19 @@ function handleStatusChange(status) {
 
 function handleError(error) {
   console.error("[App] 發生錯誤:", error);
+}
+
+async function copyJsonToClipboard() {
+  try {
+    const jsonString = JSON.stringify(lastResult.value, null, 2);
+    await navigator.clipboard.writeText(jsonString);
+    copySuccess.value = true;
+    setTimeout(() => {
+      copySuccess.value = false;
+    }, 2000);
+  } catch (err) {
+    console.error("複製失敗:", err);
+  }
 }
 </script>
 
@@ -38,8 +52,15 @@ function handleError(error) {
 
       <!-- 開發者資訊區（顯示原始回傳結果） -->
       <section v-if="lastResult" class="dev-section">
-        <h2>開發者資訊</h2>
-        <p class="dev-hint">以下為最後一次檢測的原始回傳結果（開發除錯用）</p>
+        <div class="dev-header">
+          <div>
+            <h2>開發者資訊</h2>
+            <p class="dev-hint">以下為最後一次檢測的原始回傳結果（開發除錯用）</p>
+          </div>
+          <button class="copy-btn" @click="copyJsonToClipboard">
+            {{ copySuccess ? '已複製' : '複製 JSON' }}
+          </button>
+        </div>
         <pre class="dev-output">{{ JSON.stringify(lastResult, null, 2) }}</pre>
       </section>
     </main>
@@ -90,6 +111,13 @@ function handleError(error) {
   box-sizing: border-box;
 }
 
+.dev-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
 .dev-section h2 {
   margin: 0 0 8px 0;
   font-size: 16px;
@@ -97,9 +125,29 @@ function handleError(error) {
 }
 
 .dev-hint {
-  margin: 0 0 16px 0;
+  margin: 0;
   font-size: 13px;
   color: #888;
+}
+
+.copy-btn {
+  padding: 8px 16px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.copy-btn:hover {
+  background-color: #2563eb;
+}
+
+.copy-btn:active {
+  background-color: #1d4ed8;
 }
 
 .dev-output {
